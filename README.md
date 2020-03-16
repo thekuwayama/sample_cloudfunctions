@@ -18,9 +18,17 @@ $ gcloud functions deploy listofname \
 ```
 
 ```bash
-$ curl "https://asia-northeast1-${MYPROJECT}.cloudfunctions.net/listofname" -d '[{"name": "Bob"},{"name":"Alice"}]'
-{"age":20,"sex":"male"}
-{"age":10,"sex":"female"}
+$ curl "https://asia-northeast1-${MYPROJECT}.cloudfunctions.net/listofname" -d '[{"name": "Bob"},{"name":"Alice"}]' | jq '.'
+[
+  {
+    "age": 20,
+    "sex": "male"
+  },
+  {
+    "age": 10,
+    "sex": "female"
+  }
+]
 ```
 
 ## License

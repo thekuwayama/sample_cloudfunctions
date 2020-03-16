@@ -22,13 +22,13 @@ func ListOfName(w http.ResponseWriter, r *http.Request) {
 	in := []request{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Fprint(w, "{\"age\":0,\"sex\":\"unknown\"}")
+		fmt.Fprint(w, "[{\"age\":0,\"sex\":\"unknown\"}]")
 		return
 	}
 
 	err = json.Unmarshal([]byte(body), &in)
 	if err != nil {
-		fmt.Fprint(w, "{\"age\":0,\"sex\":\"unknown\"}")
+		fmt.Fprint(w, "[{\"age\":0,\"sex\":\"unknown\"}]")
 		return
 	}
 
@@ -45,13 +45,18 @@ func ListOfName(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	for _, res := range out {
+	fmt.Fprint(w, "[")
+	for i, res := range out {
 		bytes, _ := json.Marshal(res)
-		fmt.Fprintf(w, "%s\n", string(bytes))
+		fmt.Fprintf(w, "%s", string(bytes))
+		if i != len(out)-1 {
+			fmt.Fprintf(w, ",")
+		}
 	}
+	fmt.Fprint(w, "]")
 }
 
 // func main() {
-//	http.HandleFunc("/", ListOfName)
-//	http.ListenAndServe(":8080", nil)
-//}
+// 	http.HandleFunc("/", ListOfName)
+// 	http.ListenAndServe(":8080", nil)
+// }
