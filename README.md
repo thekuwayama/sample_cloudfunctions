@@ -1,5 +1,6 @@
 # sample_cloudfunctions
 
+[![Actions Status](https://github.com/thekuwayama/sample_cloudfunctions/workflows/CI/badge.svg)](https://github.com/thekuwayama/sample_cloudfunctions/actions?workflow=CI)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://raw.githubusercontent.com/thekuwayama/sample_cloudfunctions/master/LICENSE.txt)
 
 ## Usage
