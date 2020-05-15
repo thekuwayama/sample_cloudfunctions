@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	// "os"
+	"os"
 )
 
 type response struct {
@@ -50,9 +50,8 @@ type payload struct {
 	Icon     string `json:"icon_emoji"`
 }
 
-const webhookUrl = "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
-
 func PostToSlack(channel, username, text, icon string) error {
+	webhookUrl := os.Getenv("SLACK_WEBHOOK_URL")
 	p := payload{
 		Channel:  channel,
 		Username: username,
