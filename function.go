@@ -1,62 +1,78 @@
 package function
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	// "os"
 )
 
-type request struct {
-	Name string `json:"name"`
-}
-
 type response struct {
-	Age uint8  `json:"age"`
-	Sex string `json:"sex"`
+	Method string              `json:"method"`
+	Body   string              `json:"body"`
+	Header map[string][]string `json:"header"`
 }
 
-func ListOfName(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	in := []request{}
+func ParseHttpRequest(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Fprint(w, "[{\"age\":0,\"sex\":\"unknown\"}]")
+		fmt.Fprint(w, "Error: read HTTP Request Body")
 		return
 	}
 
-	err = json.Unmarshal([]byte(body), &in)
+	res := response{
+		Method: r.Method,
+		Body:   string(body),
+		Header: r.Header,
+	}
+
+	b, err := json.MarshalIndent(res, "", "\t")
 	if err != nil {
-		fmt.Fprint(w, "[{\"age\":0,\"sex\":\"unknown\"}]")
+		fmt.Fprint(w, "Error: json marshal")
 		return
 	}
 
-	out := []response{}
-	for _, req := range in {
-		if req.Name == "Alice" {
-			out = append(out, response{10, "female"})
-		} else if req.Name == "Bob" {
-			out = append(out, response{20, "male"})
-		} else if req.Name == "Charlie" {
-			out = append(out, response{30, "male"})
-		} else {
-			out = append(out, response{0, "unknown"})
-		}
+	err = PostToSlack("#sakaitest", "cloudfunction", "```\n"+string(b)+"\n```", ":ghost:")
+	if err != nil {
+		fmt.Fprint(w, "Error: HTTP Post")
+		return
 	}
 
-	fmt.Fprint(w, "[")
-	for i, res := range out {
-		bytes, _ := json.Marshal(res)
-		fmt.Fprintf(w, "%s", string(bytes))
-		if i != len(out)-1 {
-			fmt.Fprintf(w, ",")
-		}
+	fmt.Fprint(w, "```\n"+string(b)+"\n```")
+}
+
+type payload struct {
+	Channel  string `json:"channel"`
+	Username string `json:"username"`
+	Text     string `json:"text"`
+	Icon     string `json:"icon_emoji"`
+}
+
+const webhookUrl = "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+
+func PostToSlack(channel, username, text, icon string) error {
+	p := payload{
+		Channel:  channel,
+		Username: username,
+		Text:     text,
+		Icon:     icon,
 	}
-	fmt.Fprint(w, "]")
+	b, err := json.Marshal(p)
+	if err != nil {
+		return err
+	}
+
+	_, err = http.Post(webhookUrl, "application/json", bytes.NewReader(b))
+	return err
 }
 
 // func main() {
-// 	http.HandleFunc("/", ListOfName)
-// 	http.ListenAndServe(":8080", nil)
+//    	http.HandleFunc("/", ParseHttpRequest)
+//    	err := http.ListenAndServe(":8080", nil)
+//    	if err != nil {
+//    		fmt.Fprintf(os.Stderr, "Error: starting http server %v", err)
+//    		return
+//  	}
 // }
